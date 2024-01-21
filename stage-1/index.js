@@ -7,6 +7,7 @@ const ETA = require('../helper').ETA;
 const Parallel = require('../helper').Parallel;
 
 const config = require('../config.json');
+const { driver } = require('neo4j-driver');
 
 const makeItemBuffer = require('../helper').makeItemBuffer.bind(null, config.bucket);
 
@@ -21,11 +22,11 @@ const stage1 = function(neo4j, lineReader, callback) {
     let lines = lineReader.skip;
 
     console.log('Starting node creation...');
-    let session = neo4j.session();
+    //let session = neo4j.session();
     const eta = new ETA(lineReader.total);
 
     const _done = function(e) {
-        session.close();
+        //session.close();
         callback(e);
     };
 
@@ -42,9 +43,9 @@ const stage1 = function(neo4j, lineReader, callback) {
 
         function _doQuery(buffer, extraLabel, callback) {
             buffer.forEach(x => delete x.type);
-            session
-                .run(`
-                    UNWIND {buffer} AS item WITH item
+            //console.log(clc.bgBlackBright(JSON.stringify(buffer)))
+            neo4j.executeQuery(`
+                    UNWIND $buffer AS item 
                     MERGE (n:${extraLabel}:Entity {id: item.id})
                         ON CREATE SET
                             n = item

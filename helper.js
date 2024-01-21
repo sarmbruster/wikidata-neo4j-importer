@@ -299,9 +299,9 @@ const pad = function(str, len, right, pad) {
 
 module.exports.pad = pad;
 
-const deadLockRetrier = function(session, command, params, _then, _catch) {
-    session
-        .run(command, params)
+const deadLockRetrier = function(neo4j, command, params, _then, _catch) {
+    neo4j
+        .executeQuery(command, params)
         .subscribe({
             onCompleted: function() {
                 _then()

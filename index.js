@@ -2,7 +2,7 @@
 const path = require('path');
 const execSync = require('child_process').execSync;
 
-const neo4j = require('neo4j-driver').v1;
+const neo4j = require('neo4j-driver');
 const async = require('async');
 const LineByLine = require('n-readlines');
 

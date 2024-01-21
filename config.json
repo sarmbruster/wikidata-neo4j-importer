@@ -1,21 +1,21 @@
 {
-  "file": "./small-wiki.json",
+  "file": "../latest-all.json",
   "neo4j": {
     "bolt": "bolt://localhost",
     "auth": {
       "user": "neo4j",
-      "pass": "password"
+      "pass": "12345678"
     }
   },
   "do": {
-    "0": false,
+    "0": true,
     "1": true,
-    "2": true,
-    "3": true
+    "2": false,
+    "3": false
   },
-  "verbose": false,
+  "verbose": true,
   "concurrency": 4,
   "skip": 0,
-  "lines": 21225524,
-  "bucket": 1000
+  "lines": 107069297,
+  "bucket": 1000 
 }
