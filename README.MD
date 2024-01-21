@@ -5,8 +5,8 @@ The importer takes JSON dumps from [WikiData](https://dumps.wikimedia.org/wikida
  and imports entities / properties, then generates relations between each other and claims.
 
 ## Dependencies
-- [Neo4j](http://neo4j.com/) 3.0 +
-- [NodeJS](https://nodejs.org) 6.0 +
+- [Neo4j](http://neo4j.com/) 5.x +
+- [NodeJS](https://nodejs.org) v20.11.0 +
 - [WikiData JSON File](https://dumps.wikimedia.org/wikidatawiki/entities/)
 
 ___
@@ -75,6 +75,12 @@ Tested on a 4 Core, 16GB RAM VPS with SSD's from Hetzner at around 16h
   /* bucket size of entities sent to DB to process */
   "bucket": 1000
 }
+```
+
+## Running the importer
+
+```
+node index.js
 ```
 
 ## Stages
