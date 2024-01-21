@@ -15,11 +15,11 @@ ___
 ### Schema
 We recommend having the following schema before starting the importer
 ```
-CREATE CONSTRAINT ON (item:Item) ASSERT item.id IS UNIQUE;
-CREATE CONSTRAINT ON (property:Property) ASSERT property.id IS UNIQUE;
-CREATE CONSTRAINT ON (entity:Entity) ASSERT entity.id IS UNIQUE;
-CREATE CONSTRAINT ON (claim:Claim) ASSERT claim.id IS UNIQUE;
-CREATE INDEX ON :Entity(label);
+CREATE CONSTRAINT item_id FOR (item:Item) REQUIRE item.id IS UNIQUE;
+CREATE CONSTRAINT property_id FOR (property:Property) REQUIRE property.id IS UNIQUE;
+CREATE CONSTRAINT entity_id FOR (entity:Entity) REQUIRE entity.id IS UNIQUE;
+CREATE CONSTRAINT claim_id FOR (claim:Claim) REQUIRE claim.id IS UNIQUE;
+CREATE INDEX entity_label FOR (entity:Entity) on (entity.label);
 ```
 ### Hardware
 We recommend having:
