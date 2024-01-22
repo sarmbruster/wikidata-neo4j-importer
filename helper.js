@@ -300,23 +300,31 @@ const pad = function(str, len, right, pad) {
 module.exports.pad = pad;
 
 const deadLockRetrier = function(neo4j, command, params, _then, _catch) {
-    neo4j
-        .executeQuery(command, params)
-        .subscribe({
-            onCompleted: function() {
-                _then()
-            },
-            onError: function(err) {
-                if (err.signature = 127) {
-                    // deadlock detected
-
-                    const wait = (500 + Math.random() * 500) | 0;
-                    console.log(clc.bold.red(`Deadlock detected and averted, waiting ${wait}ms!`));
-                    return setTimeout(() => deadLockRetrier(session, command, params, _then, _catch), wait);
-                }
-                return _catch(err);
+    neo4j.executeQuery(command, params)
+        .then(_then)
+        .catch(err => {
+            if (err.signature = 127) {
+                // deadlock detected
+    
+                const wait = (500 + Math.random() * 500) | 0;
+                console.log(clc.bold.red(`Deadlock detected and averted, waiting ${wait}ms!`));
+                return setTimeout(() => deadLockRetrier(neo4j, command, params, _then, _catch), wait);
             }
-        });
+            return _catch(err);
+        })
+   /*  try {
+        neo4j.executeQuery(command, params)
+        return _then()
+    } catch (err) {
+        if (err.signature = 127) {
+            // deadlock detected
+
+            const wait = (500 + Math.random() * 500) | 0;
+            console.log(clc.bold.red(`Deadlock detected and averted, waiting ${wait}ms!`));
+            return setTimeout(() => deadLockRetrier(neo4j, command, params, _then, _catch), wait);
+        }
+        return _catch(err);
+    } */
 }
 
 module.exports.deadLockRetrier = deadLockRetrier;

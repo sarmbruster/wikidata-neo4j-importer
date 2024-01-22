@@ -16,14 +16,14 @@ const config = require('../config.json');
 
 const makeItemBuffer = require('../helper').makeItemBuffer.bind(null, config.bucket);
 
-const linkNodes = function _linkNodes(session, willLinkNodes, identifier, cb) {
+const linkNodes = function _linkNodes(neo4j, willLinkNodes, identifier, cb) {
     var distinctRels = distinctify(willLinkNodes, 'relation');
 
     const runForRelType = function(relType, items, dbcb) {
         deadLockRetrier(
-            session,
+            neo4j,
             `
-                UNWIND {items} AS claim
+                UNWIND $items AS claim
                 WITH claim
 
                 MATCH (start:Entity), (end:Entity)
@@ -59,7 +59,7 @@ const linkNodes = function _linkNodes(session, willLinkNodes, identifier, cb) {
     )
 };
 
-const generateClaims = function _generateClaims(session, stash, willGenerateNodes, identifier, cb) {
+const generateClaims = function _generateClaims(neo4j, stash, willGenerateNodes, identifier, cb) {
     willGenerateNodes.forEach(item => {
         stash.push([item.label, item.relation], item);
     });
@@ -73,7 +73,7 @@ const generateClaims = function _generateClaims(session, stash, willGenerateNode
 
     async.series(
         haveToFlushToDb.map(flushee => {
-            return flushClaims.bind(null, session, identifier, flushee.keys, flushee.items);
+            return flushClaims.bind(null, neo4j, identifier, flushee.keys, flushee.items);
         }),
         (err) => {
             console.timeEnd(timeKey);
@@ -82,16 +82,16 @@ const generateClaims = function _generateClaims(session, stash, willGenerateNode
     );
 };
 
-const flushClaims = function _flushClaims(session, identifier, itemKeys, items, cb) {
+const flushClaims = function _flushClaims(neo4j, identifier, itemKeys, items, cb) {
     const timeKey = config.verbose ?
         clc.red(pad(`-> Generating ${pad(itemKeys[0], 20, true)} and linking ${itemKeys[1]} (${identifier})`, 100, true)) :
         null;
 
     if (config.verbose) console.time(timeKey);
     deadLockRetrier(
-        session,
+        neo4j,
         `
-            UNWIND {items} AS claim
+            UNWIND $items AS claim
             WITH claim
 
             MATCH (start:Entity) WHERE start.id = claim.startID
@@ -125,7 +125,7 @@ const stage2 = function(neo4j, lineReader, callback) {
 
     console.log('Starting simple node relationship creation...');
 
-    const session = neo4j.session();
+    //const session = neo4j.session();
 
     const stash = new Stash(config.bucket);
 
@@ -133,17 +133,17 @@ const stage2 = function(neo4j, lineReader, callback) {
 
     const _done = function(e) {
         if (e) {
-            session.close();
+            //session.close();
             return callback(e);
         }
         const haveToFlushToDb = stash.flushRemainder();
 
         async.series(
             haveToFlushToDb.map(flushee => {
-                return flushClaims.bind(null, session, 0, flushee.keys, flushee.items);
+                return flushClaims.bind(null, neo4j, 0, flushee.keys, flushee.items);
             }),
             (err) => {
-                session.close();
+                //session.close();
                 callback(err);
             }
         );
@@ -154,8 +154,8 @@ const stage2 = function(neo4j, lineReader, callback) {
     const props = {};
 
     const _getProps = function(cb) {
-        session
-            .run(`
+        neo4j
+            .executeQuery(`
                 MATCH (p:Property) 
                 RETURN 
                     p.id AS id,
@@ -245,11 +245,11 @@ const stage2 = function(neo4j, lineReader, callback) {
 
         const link = willLinkNodes.length === 0 ?
             (cb) => cb() :
-            (cb) => linkNodes(session, willLinkNodes, identifier, cb);
+            (cb) => linkNodes(neo4j, willLinkNodes, identifier, cb);
 
         const generate = willGenerateNodes.length === 0 ?
             (cb) => cb() :
-            (cb) => generateClaims(session, stash, willGenerateNodes, identifier, cb);
+            (cb) => generateClaims(neo4j, stash, willGenerateNodes, identifier, cb);
 
         async.series(
             [link, generate],
