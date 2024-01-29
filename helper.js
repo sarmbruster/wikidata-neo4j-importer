@@ -303,6 +303,7 @@ const deadLockRetrier = function(neo4j, command, params, _then, _catch) {
     neo4j.executeQuery(command, params)
         .then(_then)
         .catch(err => {
+            console.log(clc.bold.red(` ${err}`));
             if (err.signature = 127) {
                 // deadlock detected
     

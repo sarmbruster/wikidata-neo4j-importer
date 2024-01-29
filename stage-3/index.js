@@ -11,13 +11,13 @@ const pad = require('../helper').pad;
  * @param {function(Error)} callback
  */
 const stage3 = function(neo4j, lineReader, callback) {
-    const session = neo4j.session();
+    //const session = neo4j.session();
 
     const linkQuantityes = function _linkQuantities(callback) {
         const timeKey = clc.yellow(pad('Linkied :Quantity to :Item', 70, true));
         console.time(timeKey);
         console.log('Started linking :Quantity to :Item');
-        session.run(`
+        neo4j.executeQuery(`
                 MATCH (q:Quantity)
                     WHERE q.unit STARTS WITH 'http'
                 WITH
@@ -40,7 +40,7 @@ const stage3 = function(neo4j, lineReader, callback) {
         const timeKey = clc.yellow(pad('Linkied :GlobeCoordinate to :Item', 70, true));
         console.time(timeKey);
         console.log('Started linking :GlobeCoordinate to :Item');
-        session.run(`
+        neo4j.executeQuery(`
                 MATCH (q:GlobeCoordinate)
                     WHERE q.globe STARTS WITH 'http'
                 WITH
