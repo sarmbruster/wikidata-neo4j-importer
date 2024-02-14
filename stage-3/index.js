@@ -18,16 +18,11 @@ const stage3 = function(neo4j, lineReader, callback) {
         console.time(timeKey);
         console.log('Started linking :Quantity to :Item');
         neo4j.executeQuery(`
-                MATCH (q:Quantity)
-                    WHERE q.unit STARTS WITH 'http'
-                WITH
-                    q,
-                    TRIM(SPLIT(q.unit,'/')[-1]) AS itemId
-
-                MATCH (e:Entity) WHERE e.id = itemId
-
-                MERGE (q)-[:UNIT_TYPE]->(e)
-                REMOVE q.unit
+        CALL apoc.periodic.iterate(
+            "MATCH (q:Quantity) WHERE q.unit STARTS WITH 'http' RETURN q",
+            "WITH q, TRIM(SPLIT(q.unit,'/')[-1]) AS itemId MATCH (e:Entity) WHERE e.id = itemId MERGE (q)-[:UNIT_TYPE]->(e)         REMOVE q.unit",
+            {batchSize: 10000}
+        )
             `)
             .then(() => {
                 console.timeEnd(timeKey);
@@ -41,16 +36,11 @@ const stage3 = function(neo4j, lineReader, callback) {
         console.time(timeKey);
         console.log('Started linking :GlobeCoordinate to :Item');
         neo4j.executeQuery(`
-                MATCH (q:GlobeCoordinate)
-                    WHERE q.globe STARTS WITH 'http'
-                WITH
-                    q,
-                    TRIM(SPLIT(q.globe,'/')[-1]) AS itemId
-
-                MATCH (e:Entity) WHERE e.id = itemId
-
-                MERGE (q)-[:GLOBE_TYPE]->(e)
-                REMOVE q.globe
+        CALL apoc.periodic.iterate(
+            "MATCH (q:GlobeCoordinate) WHERE q.globe STARTS WITH 'http' RETURN q",
+            "WITH q, TRIM(SPLIT(q.globe,'/')[-1]) AS itemId MATCH (e:Entity) WHERE e.id = itemId MERGE (q)-[:GLOBE_TYPE]->(e)         REMOVE q.globe",
+            {batchSize: 10000}
+        )
             `)
             .then(() => {
                 console.timeEnd(timeKey);

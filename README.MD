@@ -19,7 +19,10 @@ CREATE CONSTRAINT item_id FOR (item:Item) REQUIRE item.id IS UNIQUE;
 CREATE CONSTRAINT property_id FOR (property:Property) REQUIRE property.id IS UNIQUE;
 CREATE CONSTRAINT entity_id FOR (entity:Entity) REQUIRE entity.id IS UNIQUE;
 CREATE CONSTRAINT claim_id FOR (claim:Claim) REQUIRE claim.id IS UNIQUE;
-CREATE INDEX entity_label FOR (entity:Entity) on (entity.label);
+CREATE INDEX entity_label FOR (entity:Entity) ON (entity.label);
+CREATE INDEX quantity_unit FOR (q:Quantity) ON (q.unit);
+CREATE INDEX globecoordinate_globe FOR (q:GlobeCoordinate) ON (q.globe);
+
 ```
 ### Hardware
 We recommend having:
