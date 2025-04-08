@@ -22,6 +22,7 @@ CREATE CONSTRAINT claim_id FOR (claim:Claim) REQUIRE claim.id IS UNIQUE;
 CREATE INDEX entity_label FOR (entity:Entity) ON (entity.label);
 CREATE INDEX quantity_unit FOR (q:Quantity) ON (q.unit);
 CREATE INDEX globecoordinate_globe FOR (q:GlobeCoordinate) ON (q.globe);
+CREATE TEXT INDEX entity_label_text_index FOR (e:Entity) on (e.label); // a text index also works with `CONTAINS`
 
 ```
 ### Hardware
