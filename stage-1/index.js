@@ -17,7 +17,7 @@ const makeItemBuffer = require('../helper').makeItemBuffer.bind(null, config.buc
  * @param {LineByLine} lineReader
  * @param {function(Error)} callback
  */
-const stage1 = function(neo4j, lineReader, callback) {
+const stage1 = function(neo4j, database, lineReader, callback) {
 
     let lines = lineReader.skip;
 
@@ -49,7 +49,7 @@ const stage1 = function(neo4j, lineReader, callback) {
                     MERGE (n:${extraLabel}:Entity {id: item.id})
                         ON CREATE SET
                             n = item
-                `, { buffer })
+                `, { buffer }, {database: database})
                 .then(()=>callback())
                 .catch(callback)
         }

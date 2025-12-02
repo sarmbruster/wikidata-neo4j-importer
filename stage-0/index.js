@@ -1,6 +1,6 @@
 'use strict';
-module.exports = (neo4j, callback) => {
-    const session = neo4j.session();
+module.exports = (neo4j, database, callback) => {
+    const session = neo4j.session({database: database});
 
     console.log('Clearing DB');
 

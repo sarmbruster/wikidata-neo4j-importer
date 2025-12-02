@@ -299,8 +299,8 @@ const pad = function(str, len, right, pad) {
 
 module.exports.pad = pad;
 
-const deadLockRetrier = function(neo4j, command, params, _then, _catch) {
-    neo4j.executeQuery(command, params)
+const deadLockRetrier = function(neo4j, database, command, params, _then, _catch) {
+    neo4j.executeQuery(command, params, {database: database})
         .then(_then)
         .catch(err => {
             console.log(clc.bold.red(` ${err}`));
@@ -309,7 +309,7 @@ const deadLockRetrier = function(neo4j, command, params, _then, _catch) {
     
                 const wait = (500 + Math.random() * 500) | 0;
                 console.log(clc.bold.red(`Deadlock detected and averted, waiting ${wait}ms!`));
-                return setTimeout(() => deadLockRetrier(neo4j, command, params, _then, _catch), wait);
+                return setTimeout(() => deadLockRetrier(neo4j, database, command, params, _then, _catch), wait);
             }
             return _catch(err);
         })

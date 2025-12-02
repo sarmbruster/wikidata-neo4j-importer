@@ -39,10 +39,10 @@ const stage2 = require('./stage-2');
 const stage3 = require('./stage-3');
 
 async.series([
-    (cb) => !config.do[0] ? cb() : stage0(driver, cb),
-    (cb) => !config.do[1] ? cb() : stage1(driver, makeLineReader(), cb),
-    (cb) => !config.do[2] ? cb() : stage2(driver, makeLineReader(), cb),
-    (cb) => !config.do[3] ? cb() : stage3(driver, makeLineReader(), cb)
+    (cb) => !config.do[0] ? cb() : stage0(driver, config.neo4j.database, cb),
+    (cb) => !config.do[1] ? cb() : stage1(driver, config.neo4j.database, makeLineReader(), cb),
+    (cb) => !config.do[2] ? cb() : stage2(driver, config.neo4j.database, makeLineReader(), cb),
+    (cb) => !config.do[3] ? cb() : stage3(driver, config.neo4j.database, makeLineReader(), cb)
 ], (err) => {
     'use strict';
     console.log(err || 'done');

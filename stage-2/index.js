@@ -16,12 +16,13 @@ const config = require('../config.json');
 
 const makeItemBuffer = require('../helper').makeItemBuffer.bind(null, config.bucket);
 
-const linkNodes = function _linkNodes(neo4j, willLinkNodes, identifier, cb) {
+const linkNodes = function _linkNodes(neo4j, database, willLinkNodes, identifier, cb) {
     var distinctRels = distinctify(willLinkNodes, 'relation');
 
     const runForRelType = function(relType, items, dbcb) {
         deadLockRetrier(
             neo4j,
+            database,
             `
                 UNWIND $items AS claim
                 WITH claim
@@ -82,7 +83,7 @@ const generateClaims = function _generateClaims(neo4j, stash, willGenerateNodes,
     );
 };
 
-const flushClaims = function _flushClaims(neo4j, identifier, itemKeys, items, cb) {
+const flushClaims = function _flushClaims(neo4j, database, identifier, itemKeys, items, cb) {
     const timeKey = config.verbose ?
         clc.red(pad(`-> Generating ${pad(itemKeys[0], 20, true)} and linking ${itemKeys[1]} (${identifier})`, 100, true)) :
         null;
@@ -90,6 +91,7 @@ const flushClaims = function _flushClaims(neo4j, identifier, itemKeys, items, cb
     if (config.verbose) console.time(timeKey);
     deadLockRetrier(
         neo4j,
+        database,
         `
             UNWIND $items AS claim
             WITH claim
@@ -120,7 +122,7 @@ const flushClaims = function _flushClaims(neo4j, identifier, itemKeys, items, cb
  * @param {LineByLine} lineReader
  * @param {function(Error)} callback
  */
-const stage2 = function(neo4j, lineReader, callback) {
+const stage2 = function(neo4j, database, lineReader, callback) {
     let lines = lineReader.skip;
 
     console.log('Starting simple node relationship creation...');
@@ -160,7 +162,7 @@ const stage2 = function(neo4j, lineReader, callback) {
                 RETURN 
                     p.id AS id,
                     p.label AS label
-            `)
+            `, {}, {database: database})
             .then(data => {
                 data.records.forEach(prop => {
                     props[prop.get('id')] = relationify(prop.get('label'))
@@ -245,11 +247,11 @@ const stage2 = function(neo4j, lineReader, callback) {
 
         const link = willLinkNodes.length === 0 ?
             (cb) => cb() :
-            (cb) => linkNodes(neo4j, willLinkNodes, identifier, cb);
+            (cb) => linkNodes(neo4j, database, willLinkNodes, identifier, cb);
 
         const generate = willGenerateNodes.length === 0 ?
             (cb) => cb() :
-            (cb) => generateClaims(neo4j, stash, willGenerateNodes, identifier, cb);
+            (cb) => generateClaims(neo4j, database, stash, willGenerateNodes, identifier, cb);
 
         async.series(
             [link, generate],

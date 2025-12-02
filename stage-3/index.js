@@ -10,7 +10,7 @@ const pad = require('../helper').pad;
  * @param {LineByLine} lineReader
  * @param {function(Error)} callback
  */
-const stage3 = function(neo4j, lineReader, callback) {
+const stage3 = function(neo4j, database, lineReader, callback) {
     //const session = neo4j.session();
 
     const linkQuantityes = function _linkQuantities(callback) {
@@ -23,7 +23,7 @@ const stage3 = function(neo4j, lineReader, callback) {
             "WITH q, TRIM(SPLIT(q.unit,'/')[-1]) AS itemId MATCH (e:Entity) WHERE e.id = itemId MERGE (q)-[:UNIT_TYPE]->(e)         REMOVE q.unit",
             {batchSize: 10000}
         )
-            `)
+            `, {}, {database: database})
             .then(() => {
                 console.timeEnd(timeKey);
                 callback()
@@ -41,7 +41,7 @@ const stage3 = function(neo4j, lineReader, callback) {
             "WITH q, TRIM(SPLIT(q.globe,'/')[-1]) AS itemId MATCH (e:Entity) WHERE e.id = itemId MERGE (q)-[:GLOBE_TYPE]->(e)         REMOVE q.globe",
             {batchSize: 10000}
         )
-            `)
+            `, {}, {database: database})
             .then(() => {
                 console.timeEnd(timeKey);
                 callback()
